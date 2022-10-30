@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Transport App'),
+      home: MyHomePage(title: 'Transport App'),
     );
   }
 }
@@ -31,26 +33,59 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  LatLng? currentLatLng;
+
+  Future<void>? setCurrentLocation() async {
+    if (await Permission.location.request().isGranted){
+      Geolocator.getCurrentPosition().then((currLocation) {
+        setState(() {
+          currentLatLng = LatLng(currLocation.latitude, currLocation.longitude);
+        });
+      });
+    }else{
+      if (await Permission.location.isPermanentlyDenied) {
+        openAppSettings();
+      }
+      setState((){
+        currentLatLng = LatLng(
+            -34.603722,
+            -58.381592
+        );
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: const GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: LatLng(0, 0),
-          zoom: 2,
-        ),
-      ),
+    return FutureBuilder(
+        future: setCurrentLocation(),
+        builder: (context, AsyncSnapshot snapshot) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(widget.title),
+            ),
+            body: currentLatLng == null ?
+            const Center(child: CircularProgressIndicator()) :
+            FlutterMap(
+              options: MapOptions(
+                center: currentLatLng,
+                zoom: 16,
+              ),
+              nonRotatedChildren: [
+                AttributionWidget.defaultWidget(
+                  source: 'OpenStreetMap contributors',
+                  onSourceTapped: null,
+                ),
+              ],
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                ),
+              ],
+            ),
+          );
+        }
     );
   }
 }
