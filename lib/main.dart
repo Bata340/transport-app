@@ -38,34 +38,59 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   LatLng? currentLatLng;
+  var stations;
   Future<void>? _fetchData;
 
+
+
   Future<LatLng?> getCurrentLocation() async {
-    try {
-      if (await Permission.location
-          .request()
-          .isGranted) {
-        Geolocator.getCurrentPosition().then((currLocation) {
-          return LatLng(currLocation.latitude, currLocation.longitude);
-        });
-      } else {
-        return LatLng(
-            -34.603722,
-            -58.381592
-        );
-      }
-    }on Exception catch (exc) {
-      throw Exception("Error on location service. $exc");
+    if (await Permission.location.request().isGranted) {
+      Position currLocation = await Geolocator.getCurrentPosition();
+      return LatLng(currLocation.latitude, currLocation.longitude);
+    } else {
+      //Default: Microcentro
+      return LatLng(
+          -34.603722,
+          -58.381592
+      );
     }
   }
+
+  void seeDetailsStation (id) {
+    print(id.toString());
+}
 
   Future<void>? fetchData() async{
     LatLng? latLong = await getCurrentLocation();
     List? stationsRecvd = await Server.getEcobiciStations();
-    print(stationsRecvd?.elementAt(0).toString());
-    setState(() {
-      currentLatLng = latLong;
+    var markers = <Marker>[];
+    stationsRecvd?.forEach((station) {
+      markers.add(
+        Marker(
+          point: LatLng(
+            station["lat"], 
+            station["lon"]
+          ),
+          builder: (context) => FloatingActionButton(
+            backgroundColor: Colors.white12.withOpacity(0.1),
+            child: Container(
+              child: Image.asset(
+                "EcoBiciMarker.png",
+                height: 45.0,
+
+                fit: BoxFit.cover,
+              ),
+            ),
+            onPressed: (){seeDetailsStation(station["station_id"]);},
+          )
+        )
+      );
     });
+    setState((){
+      currentLatLng = latLong;
+      stations = markers;
+    });
+
   }
 
   @override
@@ -76,34 +101,30 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: _fetchData,
-        builder: (context, AsyncSnapshot snapshot) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(widget.title),
-            ),
-            body: currentLatLng == null ?
-            const Center(child: CircularProgressIndicator()) :
-            FlutterMap(
-              options: MapOptions(
-                center: currentLatLng,
-                zoom: 16,
-              ),
-              nonRotatedChildren: [
-                AttributionWidget.defaultWidget(
-                  source: 'OpenStreetMap contributors',
-                  onSourceTapped: null,
-                ),
-              ],
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                ),
-              ],
-            ),
-          );
-        }
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body:
+      currentLatLng == null ? const Center(child: CircularProgressIndicator()) :
+      FlutterMap(
+        options: MapOptions(
+          center: currentLatLng,
+          zoom: 16,
+        ),
+        nonRotatedChildren: [
+          AttributionWidget.defaultWidget(
+            source: 'OpenStreetMap contributors',
+            onSourceTapped: null,
+          ),
+        ],
+        children: [
+          TileLayer(
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          ),
+          MarkerLayer(markers: stations)
+        ],
+      ),
     );
   }
 }
