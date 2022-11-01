@@ -39,8 +39,8 @@ class HomePage extends StatelessWidget {
               );},
               style: ButtonStyle(
                   elevation: MaterialStateProperty.resolveWith<double?>((states) => 1.5),
-                  maximumSize: MaterialStateProperty.resolveWith<Size?>((states) => const Size(250.0, 75.0)),
-                  minimumSize: MaterialStateProperty.resolveWith<Size?>((states) => const Size(225.0, 75.0)),
+                  maximumSize: MaterialStateProperty.resolveWith<Size?>((states) => Size(MediaQuery.of(context).size.width*0.7, MediaQuery.of(context).size.height*0.1)),
+                  minimumSize: MaterialStateProperty.resolveWith<Size?>((states) => Size(MediaQuery.of(context).size.width*0.6, MediaQuery.of(context).size.height*0.1)),
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -74,8 +74,8 @@ class HomePage extends StatelessWidget {
               );},
               style: ButtonStyle(
                   elevation: MaterialStateProperty.resolveWith<double?>((states) => 1.5),
-                  maximumSize: MaterialStateProperty.resolveWith<Size?>((states) => const Size(250.0, 75.0)),
-                  minimumSize: MaterialStateProperty.resolveWith<Size?>((states) => const Size(225.0, 75.0)),
+                  maximumSize: MaterialStateProperty.resolveWith<Size?>((states) => Size(MediaQuery.of(context).size.width*0.7, MediaQuery.of(context).size.height*0.1)),
+                  minimumSize: MaterialStateProperty.resolveWith<Size?>((states) => Size(MediaQuery.of(context).size.width*0.6, MediaQuery.of(context).size.height*0.1)),
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
@@ -109,8 +109,8 @@ class HomePage extends StatelessWidget {
               );},
               style: ButtonStyle(
                   elevation: MaterialStateProperty.resolveWith<double?>((states) => 1.5),
-                  maximumSize: MaterialStateProperty.resolveWith<Size?>((states) => const Size(250.0, 75.0)),
-                  minimumSize: MaterialStateProperty.resolveWith<Size?>((states) => const Size(225.0, 75.0)),
+                  maximumSize: MaterialStateProperty.resolveWith<Size?>((states) => Size(MediaQuery.of(context).size.width*0.7, MediaQuery.of(context).size.height*0.1)),
+                  minimumSize: MaterialStateProperty.resolveWith<Size?>((states) => Size(MediaQuery.of(context).size.width*0.6, MediaQuery.of(context).size.height*0.1)),
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),

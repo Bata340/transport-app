@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../ApiCalls/ecobici_calls.dart';
 import 'package:flutter/material.dart';
+import './ecobici_detail.dart';
 
 
 
@@ -20,7 +21,6 @@ class _EcobiciMapState extends State<EcobiciMap> {
 
   LatLng? currentLatLng;
   var stations;
-  Future<void>? _fetchData;
 
 
 
@@ -37,8 +37,16 @@ class _EcobiciMapState extends State<EcobiciMap> {
     }
   }
 
-  void seeDetailsStation (id) {
-    print(id.toString());
+  void seeDetailsStation (id, name, rentalMethods, capacity) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => EcobiciDetail(
+          stationId: id,
+          stationName: name,
+          rentalMethods: rentalMethods,
+          capacity: capacity
+        ))
+    );
   }
 
   Future<void>? fetchData() async{
@@ -64,7 +72,14 @@ class _EcobiciMapState extends State<EcobiciMap> {
                     fit: BoxFit.cover,
                   ),
                 ),
-                onPressed: (){seeDetailsStation(station["station_id"]);},
+                onPressed: (){
+                  seeDetailsStation(
+                    station["station_id"],
+                    station["name"],
+                    station["rental_methods"].toList(),
+                    station["capacity"]
+                  );
+                },
               )
           )
       );
@@ -78,7 +93,7 @@ class _EcobiciMapState extends State<EcobiciMap> {
 
   @override
   void initState() {
-    _fetchData = fetchData();
+    fetchData();
     super.initState();
   }
 
