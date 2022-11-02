@@ -37,14 +37,15 @@ class _EcobiciMapState extends State<EcobiciMap> {
     }
   }
 
-  void seeDetailsStation (id, name, rentalMethods, capacity) {
+  void seeDetailsStation (id, name, rentalMethods, capacity, address) {
     Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => EcobiciDetail(
           stationId: id,
           stationName: name,
           rentalMethods: rentalMethods,
-          capacity: capacity
+          capacity: capacity,
+          address: address
         ))
     );
   }
@@ -77,7 +78,8 @@ class _EcobiciMapState extends State<EcobiciMap> {
                     station["station_id"],
                     station["name"],
                     station["rental_methods"].toList(),
-                    station["capacity"]
+                    station["capacity"],
+                    station["address"]
                   );
                 },
               )

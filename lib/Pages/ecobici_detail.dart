@@ -10,7 +10,8 @@ class EcobiciDetail extends StatefulWidget {
       required this.stationId,
       required this.stationName,
       required this.rentalMethods,
-      required this.capacity
+      required this.capacity,
+      required this.address
     }
   );
 
@@ -18,6 +19,7 @@ class EcobiciDetail extends StatefulWidget {
   final String? stationName;
   final List? rentalMethods;
   final int? capacity;
+  final String? address;
 
   @override
   State<EcobiciDetail> createState() => _EcobiciDetail();
@@ -107,7 +109,23 @@ class _EcobiciDetail extends State<EcobiciDetail> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(widget.stationName!)
+                      Flexible(
+                        child: Text(widget.stationName!)
+                      )
+                    ],
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Dirección: ",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(widget.address!)
+                      )
                     ],
                   ),
                   Row(
