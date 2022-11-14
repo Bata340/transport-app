@@ -2,6 +2,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:tdl_transporte_divs_centrados/Pages/subtes_detail.dart';
 import '../ApiCalls/subtes_calls.dart';
 import 'package:flutter/material.dart';
 
@@ -36,11 +37,23 @@ class _SubteMapState extends State<SubteMap> {
     }
   }
 
+  void seeDetailsStation (id, name, route) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SubteDetail(
+            stationId: id,
+            stationName: name,
+            route: route,
+        ))
+    );
+  }
+
   Future<void>? fetchData() async{
     LatLng? latLong = await getCurrentLocation();
     List? stationsRecvd = await Server.getSubtesStations();
     var markers = <Marker>[];
     stationsRecvd?.forEach((station) {
+      print(station);
       markers.add(
           Marker(
               point: LatLng(
@@ -60,7 +73,11 @@ class _SubteMapState extends State<SubteMap> {
                   ),
                 ),
                 onPressed: (){
-
+                  seeDetailsStation(
+                      station["station_id"],
+                      station["name"],
+                      station["route"],
+                  );
                 },
               )
           )

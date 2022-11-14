@@ -31,7 +31,7 @@ class Server{
           if(file.name == 'stops.txt'){
             Iterable csv = CsvToListConverter().convert(utf8.decode(file.content))..removeAt(0);
             csv = csv.where((element) => element[0] is int && element[0] < 10000); // Los menores a 10000 son subestaciones
-            stations = csv.map((e) => {"id":e[0], "name":e[2], "lat":e[4], "lon":e[5], "route":routes[e[0].toString()]}).toList();
+            stations = csv.map((e) => {"station_id":e[0].toString(), "name":e[2], "lat":e[4], "lon":e[5], "route":routes[e[0].toString()]}).toList();
           } else if (file.name == 'stop_times.txt'){
             Iterable csv = CsvToListConverter().convert(utf8.decode(file.content))..removeAt(0);
             for(final elem in csv){
@@ -59,14 +59,24 @@ class Server{
     };
 
     final response = await http.get(
-      Uri.https(urlApi!, "/ecobici/gbfs/stationStatus", qParams),
+      Uri.https(urlApi!, "/subtes/forecastGTFS", qParams),
     );
     switch (response.statusCode) {
       case HttpStatus.ok:
-        List list = json.decode(response.body)['data']['stations'].toList();
-        return list.where((item) => item["station_id"] == stationId).toList().elementAt(0);
+        List times = [0,0];
+         print(stationId);
+        for(final recorrido in json.decode(response.body)["Entity"]){
+          int direccion = int.parse(recorrido["Linea"]["Trip_Id"][1]);
+          for(final estacion in recorrido["Linea"]["Estaciones"]){
+            print(estacion);
+            if(estacion["stop_id"].substring(0, estacion["stop_id"].length - 1) == stationId){
+              times[direccion] = estacion["arrival"]["delay"];
+            }
+          }
+        }
+        return times;
       default:
-        throw Exception("Fallo al recuperar las estaciones de Ecobici.");
+        throw Exception("Fallo al recuperar las estaciones de Subtes.");
     }
   }
 
