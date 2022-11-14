@@ -3,8 +3,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../ApiCalls/ecobici_calls.dart';
+import '../ApiCalls/subtes_calls.dart';
 import 'package:flutter/material.dart';
 import './ecobici_map.dart';
+import './subtes_map.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -105,7 +107,7 @@ class HomePage extends StatelessWidget {
               key: const Key("button_subte"),
               onPressed: () {Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const EcobiciMap(title: "Estaciones de Subte"))
+                  MaterialPageRoute(builder: (context) => const SubteMap(title: "Estaciones de Subte"))
               );},
               style: ButtonStyle(
                   elevation: MaterialStateProperty.resolveWith<double?>((states) => 1.5),
