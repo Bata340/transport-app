@@ -5,8 +5,6 @@ import 'package:permission_handler/permission_handler.dart';
 import '../ApiCalls/colectivos_calls.dart';
 import 'package:flutter/material.dart';
 
-
-
 class ColectivosMap extends StatefulWidget {
   ColectivosMap({super.key, required this.title, required this.routes});
 
@@ -18,11 +16,8 @@ class ColectivosMap extends StatefulWidget {
 }
 
 class _ColectivosMapState extends State<ColectivosMap> {
-
   LatLng? currentLatLng;
   var stations;
-
-
 
   Future<LatLng?> getCurrentLocation() async {
     if (await Permission.location.request().isGranted) {
@@ -30,14 +25,13 @@ class _ColectivosMapState extends State<ColectivosMap> {
       return LatLng(currLocation.latitude, currLocation.longitude);
     } else {
       //Default: Microcentro
-      return LatLng(
-          -34.603722,
-          -58.381592
-      );
+      return LatLng(-34.603722, -58.381592);
     }
   }
 
-  Future<void>? fetchData() async{
+  Future<void>? fetchData() async {
+    LatLng? latLong = await getCurrentLocation();
+    List? stationsRecvd = await Server.getColectivosStations(widget.routes);
     /*LatLng? latLong = await getCurrentLocation();
     List? stationsRecvd = await Server.getEcobiciStations();
     var markers = <Marker>[];
@@ -89,12 +83,11 @@ class _ColectivosMapState extends State<ColectivosMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body:
-        const Text("HOLA")
-      /*currentLatLng == null ? const Center(child: CircularProgressIndicator()) :
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: const Text("HOLA")
+        /*currentLatLng == null ? const Center(child: CircularProgressIndicator()) :
       FlutterMap(
         options: MapOptions(
           center: currentLatLng,
@@ -113,6 +106,6 @@ class _ColectivosMapState extends State<ColectivosMap> {
           MarkerLayer(markers: stations)
         ],
       ),*/
-    );
+        );
   }
 }
