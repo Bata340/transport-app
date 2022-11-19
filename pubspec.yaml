@@ -46,6 +46,7 @@ dependencies:
   flutter_map_marker_cluster: ^1.0.1
   archive: ^3.3.2
   csv: ^5.0.1
+  multi_select_flutter: ^4.1.2
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,8 @@ flutter:
     - EcoBiciMarker.png
     - Colectivo.png
     - Subte.png
+    - colectivoHorizontal.png
+    - MarkerColectivo.png
     - ecobiciBike.png
     - ecobiciStand.png
     - logoEcobici.png

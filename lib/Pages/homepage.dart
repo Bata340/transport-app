@@ -1,12 +1,7 @@
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
-import '../ApiCalls/ecobici_calls.dart';
-import '../ApiCalls/subtes_calls.dart';
 import 'package:flutter/material.dart';
 import './ecobici_map.dart';
 import './subtes_map.dart';
+import './colectivos_ramales.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -72,7 +67,7 @@ class HomePage extends StatelessWidget {
               key: const Key("button_colectivo"),
               onPressed: () {Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const EcobiciMap(title: "Paradas de Colectivo"))
+                  MaterialPageRoute(builder: (context) => const ColectivosRamales(title: "Ramales de Colectivo"))
               );},
               style: ButtonStyle(
                   elevation: MaterialStateProperty.resolveWith<double?>((states) => 1.5),
