@@ -1,7 +1,5 @@
-
 import 'package:flutter/material.dart';
 import './Pages/homepage.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Transport App',
+      title: 'Movete!',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -21,5 +19,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-

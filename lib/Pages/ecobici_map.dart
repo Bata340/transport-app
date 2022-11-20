@@ -6,8 +6,6 @@ import '../ApiCalls/ecobici_calls.dart';
 import 'package:flutter/material.dart';
 import './ecobici_detail.dart';
 
-
-
 class EcobiciMap extends StatefulWidget {
   const EcobiciMap({super.key, required this.title});
 
@@ -18,11 +16,8 @@ class EcobiciMap extends StatefulWidget {
 }
 
 class _EcobiciMapState extends State<EcobiciMap> {
-
   LatLng? currentLatLng;
   var stations;
-
-
 
   Future<LatLng?> getCurrentLocation() async {
     if (await Permission.location.request().isGranted) {
@@ -30,38 +25,30 @@ class _EcobiciMapState extends State<EcobiciMap> {
       return LatLng(currLocation.latitude, currLocation.longitude);
     } else {
       //Default: Microcentro
-      return LatLng(
-          -34.603722,
-          -58.381592
-      );
+      return LatLng(-34.603722, -58.381592);
     }
   }
 
-  void seeDetailsStation (id, name, rentalMethods, capacity, address) {
+  void seeDetailsStation(id, name, rentalMethods, capacity, address) {
     Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => EcobiciDetail(
-          stationId: id,
-          stationName: name,
-          rentalMethods: rentalMethods,
-          capacity: capacity,
-          address: address
-        ))
-    );
+        MaterialPageRoute(
+            builder: (context) => EcobiciDetail(
+                stationId: id,
+                stationName: name,
+                rentalMethods: rentalMethods,
+                capacity: capacity,
+                address: address)));
   }
 
-  Future<void>? fetchData() async{
+  Future<void>? fetchData() async {
     LatLng? latLong = await getCurrentLocation();
     List? stationsRecvd = await Server.getEcobiciStations();
     var markers = <Marker>[];
     stationsRecvd?.forEach((station) {
-      markers.add(
-          Marker(
-              point: LatLng(
-                  station["lat"],
-                  station["lon"]
-              ),
-              builder: (context) => FloatingActionButton(
+      markers.add(Marker(
+          point: LatLng(station["lat"], station["lon"]),
+          builder: (context) => FloatingActionButton(
                 heroTag: ("marker_${station["station_id"]}"),
                 key: Key("marker_${station["station_id"]}"),
                 backgroundColor: Colors.white12.withOpacity(0.1),
@@ -69,28 +56,23 @@ class _EcobiciMapState extends State<EcobiciMap> {
                   child: Image.asset(
                     "EcoBiciMarker.png",
                     height: 45.0,
-
                     fit: BoxFit.cover,
                   ),
                 ),
-                onPressed: (){
+                onPressed: () {
                   seeDetailsStation(
-                    station["station_id"],
-                    station["name"],
-                    station["rental_methods"].toList(),
-                    station["capacity"],
-                    station["address"]
-                  );
+                      station["station_id"],
+                      station["name"],
+                      station["rental_methods"].toList(),
+                      station["capacity"],
+                      station["address"]);
                 },
-              )
-          )
-      );
+              )));
     });
-    setState((){
+    setState(() {
       currentLatLng = latLong;
       stations = markers;
     });
-
   }
 
   @override
@@ -104,27 +86,28 @@ class _EcobiciMapState extends State<EcobiciMap> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        backgroundColor: Color(0xFFF39119),
       ),
-      body:
-      currentLatLng == null ? const Center(child: CircularProgressIndicator()) :
-      FlutterMap(
-        options: MapOptions(
-          center: currentLatLng,
-          zoom: 16,
-        ),
-        nonRotatedChildren: [
-          AttributionWidget.defaultWidget(
-            source: 'OpenStreetMap contributors',
-            onSourceTapped: null,
-          ),
-        ],
-        children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          ),
-          MarkerLayer(markers: stations)
-        ],
-      ),
+      body: currentLatLng == null
+          ? const Center(child: CircularProgressIndicator())
+          : FlutterMap(
+              options: MapOptions(
+                center: currentLatLng,
+                zoom: 16,
+              ),
+              nonRotatedChildren: [
+                AttributionWidget.defaultWidget(
+                  source: 'OpenStreetMap contributors',
+                  onSourceTapped: null,
+                ),
+              ],
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                ),
+                MarkerLayer(markers: stations)
+              ],
+            ),
     );
   }
 }
