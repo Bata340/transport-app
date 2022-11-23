@@ -1,0 +1,8 @@
+{
+  "builds": [
+    {"src": "/python_api/colectivos_api.py", "use": "@now/python"}
+  ],
+  "routes": [
+    {"src": "/python_api", "dest": "python_api/colectivos_api.py"}
+  ]
+}
