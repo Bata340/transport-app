@@ -3,6 +3,7 @@ from zipfile import ZipFile
 from typing import List
 from dotenv import dotenv_values
 import requests, io, pandas as pd, json
+import uvicorn
 
 app = FastAPI()
 dotenv_vals = dotenv_values("../.env")
@@ -34,4 +35,7 @@ async def get_stations_from_ramales(ramales: List[int]):
     merged_df = pd.merge(merged_df, df_stops_ramales, on="stop_id")
     merged_df['json'] = merged_df.apply(lambda x: x.to_json(), axis=1)
     return json.dumps(merged_df.loc[:,"json"].tolist())
+
+if __name__ == "__main__":
+  uvicorn.run("colectivos_api:app", host="0.0.0.0", port=8000, reload=True)
 
