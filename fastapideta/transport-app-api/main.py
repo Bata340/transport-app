@@ -1,16 +1,14 @@
 from fastapi import FastAPI
 from zipfile import ZipFile
 from typing import List
-from dotenv import dotenv_values
-import requests, io, pandas as pd, json
-import uvicorn
-
+from dotenv import load_dotenv
+import requests, io, pandas as pd, json, os
+load_dotenv(".env")
 app = FastAPI()
-dotenv_vals = dotenv_values("../.env")
-paramsReq = dict()
-paramsReq["client_id"] = dotenv_vals["api_client_id"]
-paramsReq["client_secret"] = dotenv_vals["api_client_secret"]
-reqUrl = "https://"+dotenv_vals["api_url"]+"/colectivos/feed-gtfs"
+paramsReq=dict()
+paramsReq["client_id"] = os.getenv("api_client_id")
+paramsReq["client_secret"] = os.getenv("api_client_secret")
+reqUrl = "https://"+os.getenv("api_url")+"/colectivos/feed-gtfs"
 zipReq = requests.get(reqUrl, params=paramsReq, stream=True)
 with ZipFile(io.BytesIO(zipReq.content)) as zip:
     df_routes = pd.read_csv(zip.open("routes.txt"))
@@ -35,7 +33,4 @@ async def get_stations_from_ramales(ramales: List[int]):
     merged_df = pd.merge(merged_df, df_stops_ramales, on="stop_id")
     merged_df['json'] = merged_df.apply(lambda x: x.to_json(), axis=1)
     return json.dumps(merged_df.loc[:,"json"].tolist())
-
-if __name__ == "__main__":
-  uvicorn.run("colectivos_api:app", host="0.0.0.0", port=8000, reload=True)
 
