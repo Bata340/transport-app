@@ -41,7 +41,7 @@ class Server {
     }
   }
 
-  static Future<List?> getColectivosStations(ramal) async {
+  static Future<Map?> getColectivosStations(ramal) async {
     await dotenv.load();
     var clientId = dotenv.env["api_client_id"];
     var clientSecret = dotenv.env["api_client_secret"];
@@ -57,23 +57,14 @@ class Server {
     );
     switch (response.statusCode) {
       case HttpStatus.ok:
-        List stations = [];
-        List routes = [];
-        List names = [];
-        Iterable csv = [];
-        Iterable aux;
-        Iterable stop_id_aux;
-        Iterable stop_data_aux;
         final archive = ZipDecoder().decodeBytes(response.bodyBytes);
-        print(ramal);
 
         Iterable trips_csv = [];
         Iterable stop_times_csv = [];
         Iterable stops_csv = [];
 
-        var ramal_nombre = ramal.map((ram) => ram['id']);
-        //print(ramal_nombre);
-        //ArchiveFile trip_file = archive.where((file) => file.name == "trips.txt");
+        var route_ids = ramal.map((ram) => ram['id']).toList();
+
         for (final file in archive) {
           if (file.name == 'trips.txt') {
             trips_csv = CsvToListConverter().convert(utf8.decode(file.content))
@@ -89,56 +80,24 @@ class Server {
               ..removeAt(0);
           }
         }
-        // for (final file in archive) {
-        //   if (file.name == 'trips.txt') {
-        //     csv = CsvToListConverter().convert(utf8.decode(file.content))
-        //       ..removeAt(0);
-        //     csv = csv.where((element) => ramal_nombre.contains(element[1]));
-        //     break;
-        //   }
-        // }
-        aux = trips_csv.where((element) => ramal_nombre.contains(element[1]));
-        aux = aux.map((ram) => ram[0]); //trips_id
-        // print("trips_ids");
-        // print(aux);
-        // for (final file in archive) {
-        //   if (file.name == 'stop_times.txt') {
-        //     csv = CsvToListConverter().convert(utf8.decode(file.content))
-        //       ..removeAt(0);
-        //     csv = csv.where((element) => aux.contains(element[0]));
-        //     break;
-        //   }
-        // }
-        stop_id_aux =
-            stop_times_csv.where((element) => aux.contains(element[0]));
-        stop_id_aux = stop_id_aux.map((ram) => ram[2]); //stop_id
-        print("stop_id");
-        print(stop_id_aux);
-        // for (final file in archive) {
-        //   if (file.name == 'stops.txt') {
-        //     csv = CsvToListConverter().convert(utf8.decode(file.content))
-        //       ..removeAt(0);
-        //     csv = csv.where((element) => aux.contains(element[0]));
-        //     print(csv);
-        //     break;
-        //   }
-        // }
-        stop_data_aux =
-            stops_csv.where((element) => stop_id_aux.contains(element[0]));
-        print("stop_info");
-        print(stop_data_aux);
-        routes = stop_data_aux
-            .map((e) => {
-                  "station_id": e[0],
-                  "name": e[2],
-                  "lat": e[4],
-                  "lon": e[5],
-                  "route": 'Nombre Ruta' //TODO iterar por los seleccionados
-                })
-            .toList();
-        print('estaciones');
-        print(routes);
-        return routes;
+        List trips_list = trips_csv.where((trip) => route_ids.contains(trip[1])).toList();
+        var return_msg = {};
+        for(var trip in trips_list){
+          var stops_times_list = stop_times_csv.where((st) => st[0] == trip[0]).map((st)=>st[2]).toList();
+          var stops = stops_csv.where((st) => stops_times_list.contains(st[0])).toList();
+          if(return_msg.containsKey(trip[1])){
+            return_msg[trip[1]].add({
+              "trip": trip,
+              "stops": stops
+            });
+          }else {
+            return_msg[trip[1]] = [{
+              "trip": trip,
+              "stops": stops
+            }];
+          }
+        }
+        return return_msg;
       default:
         throw Exception("Fallo al recuperar las estaciones de Colectivo.");
     }

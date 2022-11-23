@@ -31,46 +31,42 @@ class _ColectivosMapState extends State<ColectivosMap> {
 
   Future<void>? fetchData() async {
     LatLng? latLong = await getCurrentLocation();
-    List? stationsRecvd = await Server.getColectivosStations(widget.routes);
-    /*LatLng? latLong = await getCurrentLocation();
-    List? stationsRecvd = await Server.getEcobiciStations();
+    Map? stationsRecvd = await Server.getColectivosStations(widget.routes);
     var markers = <Marker>[];
-    stationsRecvd?.forEach((station) {
-      markers.add(
-          Marker(
-              point: LatLng(
-                  station["lat"],
-                  station["lon"]
-              ),
-              builder: (context) => FloatingActionButton(
-                heroTag: ("marker_${station["station_id"]}"),
-                key: Key("marker_${station["station_id"]}"),
-                backgroundColor: Colors.white12.withOpacity(0.1),
-                child: Container(
-                  child: Image.asset(
-                    "EcoBiciMarker.png",
-                    height: 45.0,
-
-                    fit: BoxFit.cover,
+    stationsRecvd?.forEach((key, trips) {
+      trips.forEach((trip_and_stops) {
+        trip_and_stops["stops"].forEach((stop) {
+          markers.add(
+              Marker(
+                  point: LatLng(
+                      stop[4], //Lat
+                      stop[5] //Lon
                   ),
-                ),
-                onPressed: (){
-                  seeDetailsStation(
-                      station["station_id"],
-                      station["name"],
-                      station["rental_methods"].toList(),
-                      station["capacity"],
-                      station["address"]
-                  );
-                },
+                  builder: (context) =>
+                      FloatingActionButton(
+                        heroTag: ("marker_${stop[0]}"),
+                        key: Key("marker_${stop[0]}"),
+                        backgroundColor: Colors.white12.withOpacity(0.1),
+                        child: Container(
+                          child: Image.asset(
+                            "EcoBiciMarker.png",
+                            height: 45.0,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        onPressed: () {
+                          print("TOUCH ${stop[0]}");
+                        },
+                      )
               )
-          )
-      );
+          );
+        });
+      });
     });
     setState((){
       currentLatLng = latLong;
       stations = markers;
-    });*/
+    });
     return;
   }
 
@@ -83,11 +79,11 @@ class _ColectivosMapState extends State<ColectivosMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: const Text("HOLA")
-        /*currentLatLng == null ? const Center(child: CircularProgressIndicator()) :
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body:
+      currentLatLng == null ? const Center(child: CircularProgressIndicator()) :
       FlutterMap(
         options: MapOptions(
           center: currentLatLng,
@@ -105,7 +101,7 @@ class _ColectivosMapState extends State<ColectivosMap> {
           ),
           MarkerLayer(markers: stations)
         ],
-      ),*/
-        );
+      ),
+    );
   }
 }
