@@ -10,7 +10,7 @@ dotenv_vals = dotenv_values("../.env")
 paramsReq = dict()
 paramsReq["client_id"] = dotenv_vals["api_client_id"]
 paramsReq["client_secret"] = dotenv_vals["api_client_secret"]
-reqUrl = f'https://{dotenv_vals["api_url"]}/colectivos/feed-gtfs'
+reqUrl = "https://"+dotenv_vals["api_url"]+"/colectivos/feed-gtfs"
 zipReq = requests.get(reqUrl, params=paramsReq, stream=True)
 with ZipFile(io.BytesIO(zipReq.content)) as zip:
     df_routes = pd.read_csv(zip.open("routes.txt"))
