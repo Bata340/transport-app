@@ -84,30 +84,38 @@ class _EcobiciMapState extends State<EcobiciMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Color(0xFFF39119),
-      ),
-      body: currentLatLng == null
-          ? const Center(child: CircularProgressIndicator())
-          : FlutterMap(
-              options: MapOptions(
-                center: currentLatLng,
-                zoom: 16,
-              ),
-              nonRotatedChildren: [
-                AttributionWidget.defaultWidget(
-                  source: 'OpenStreetMap contributors',
-                  onSourceTapped: null,
-                ),
-              ],
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                ),
-                MarkerLayer(markers: stations)
-              ],
+        appBar: AppBar(
+          title: Text(widget.title),
+          backgroundColor: Color(0xFFF39119),
+        ),
+        body: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/ecobici_detail/background_ecobici.png"),
+              fit: BoxFit.fitHeight,
             ),
-    );
+          ),
+          child: currentLatLng == null
+              ? const Center(child: CircularProgressIndicator())
+              : FlutterMap(
+                  options: MapOptions(
+                    center: currentLatLng,
+                    zoom: 16,
+                  ),
+                  nonRotatedChildren: [
+                    AttributionWidget.defaultWidget(
+                      source: 'OpenStreetMap contributors',
+                      onSourceTapped: null,
+                    ),
+                  ],
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    ),
+                    MarkerLayer(markers: stations)
+                  ],
+                ),
+        ));
   }
 }

@@ -80,23 +80,36 @@ class Server {
               ..removeAt(0);
           }
         }
-        List trips_list = trips_csv.where((trip) => route_ids.contains(trip[1])).toList();
+        List trips_list =
+            trips_csv.where((trip) => route_ids.contains(trip[1])).toList();
         var return_msg = {};
-        for(var trip in trips_list){
-          var stops_times_list = stop_times_csv.where((st) => st[0] == trip[0]).map((st)=>st[2]).toList();
-          var stops = stops_csv.where((st) => stops_times_list.contains(st[0])).toList();
-          if(return_msg.containsKey(trip[1])){
-            return_msg[trip[1]].add({
-              "trip": trip,
-              "stops": stops
-            });
-          }else {
-            return_msg[trip[1]] = [{
-              "trip": trip,
-              "stops": stops
-            }];
+        for (var trip in trips_list) {
+          Map stops_times_map = {};
+          stop_times_csv
+              .where((st) => st[0] == trip[0])
+              .forEach((st) => {stops_times_map[st[2]] = st[1]});
+
+          var stops = stops_csv
+              .where((st) => stops_times_map.containsKey(st[0]))
+              .map((e) => [e[0], stops_times_map[e[0]], e[2], e[4], e[5]])
+              .toList();
+
+          stops.sort((a, b) => a[1].compareTo(b[1]));
+          //print(stops);
+          // var name_route = {trip[4], trip[5]};
+          // print(name_route);
+
+          //print(return_msg.containsKey(name_route));
+          if (return_msg.containsKey(trip[4].toString() + trip[5].toString())) {
+            //return_msg[{trip[4], trip[5]}].add({"trip": trip, "stops": stops});
+          } else {
+            return_msg[trip[4].toString() + trip[5].toString()] = [
+              {"trip": trip, "stops": stops}
+            ];
           }
+          print(return_msg.keys);
         }
+        print(return_msg);
         return return_msg;
       default:
         throw Exception("Fallo al recuperar las estaciones de Colectivo.");
