@@ -102,12 +102,6 @@ class _EcobiciMapState extends State<EcobiciMap> {
                     center: currentLatLng,
                     zoom: 16,
                   ),
-                  nonRotatedChildren: [
-                    AttributionWidget.defaultWidget(
-                      source: 'OpenStreetMap contributors',
-                      onSourceTapped: null,
-                    ),
-                  ],
                   children: [
                     TileLayer(
                       urlTemplate:

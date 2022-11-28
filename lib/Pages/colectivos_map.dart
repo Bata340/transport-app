@@ -148,12 +148,6 @@ class _ColectivosMapState extends State<ColectivosMap> {
                     center: currentLatLng,
                     zoom: 16,
                   ),
-                  nonRotatedChildren: [
-                    AttributionWidget.defaultWidget(
-                      source: 'OpenStreetMap contributors',
-                      onSourceTapped: null,
-                    ),
-                  ],
                   children: [
                     TileLayer(
                       urlTemplate:

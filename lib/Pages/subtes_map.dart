@@ -109,12 +109,6 @@ class _SubteMapState extends State<SubteMap> {
           center: currentLatLng,
           zoom: 16,
         ),
-        nonRotatedChildren: [
-          AttributionWidget.defaultWidget(
-            source: 'OpenStreetMap contributors',
-            onSourceTapped: null,
-          ),
-        ],
         children: [
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
