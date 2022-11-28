@@ -5,23 +5,14 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:archive/archive_io.dart';
 import 'package:csv/csv.dart';
+import '../globals.dart' as globals;
+
 
 class Server {
   static Future<List> getColectivosRamales() async {
-    await dotenv.load();
-    var clientId = dotenv.env["api_client_id"];
-    var clientSecret = dotenv.env["api_client_secret"];
-    var urlApi = dotenv.env["api_url"];
-
-    final Map<String, String> qParams = {
-      'client_id': clientId!,
-      'client_secret': clientSecret!,
-    };
     List ramales = [];
 
-    final response = await http.get(
-      Uri.https(urlApi!, "/colectivos/feed-gtfs", qParams),
-    );
+    final response = await globals.zipColectivosCall;
     switch (response.statusCode) {
       case HttpStatus.ok:
         final archive = ZipDecoder().decodeBytes(response.bodyBytes);
@@ -42,19 +33,7 @@ class Server {
   }
 
   static Future<Map?> getColectivosStations(ramal) async {
-    await dotenv.load();
-    var clientId = dotenv.env["api_client_id"];
-    var clientSecret = dotenv.env["api_client_secret"];
-    var urlApi = dotenv.env["api_url"];
-
-    final Map<String, String> qParams = {
-      'client_id': clientId!,
-      'client_secret': clientSecret!,
-    };
-
-    final response = await http.get(
-      Uri.https(urlApi!, "/colectivos/feed-gtfs", qParams),
-    );
+    final response = await globals.zipColectivosCall;
     switch (response.statusCode) {
       case HttpStatus.ok:
         final archive = ZipDecoder().decodeBytes(response.bodyBytes);
@@ -81,7 +60,7 @@ class Server {
           }
         }
         List trips_list =
-            trips_csv.where((trip) => route_ids.contains(trip[1])).toList();
+          trips_csv.where((trip) => route_ids.contains(trip[1])).toList();
         var return_msg = {};
         for (var trip in trips_list) {
           Map stops_times_map = {};
@@ -95,11 +74,6 @@ class Server {
               .toList();
 
           stops.sort((a, b) => a[1].compareTo(b[1]));
-          //print(stops);
-          // var name_route = {trip[4], trip[5]};
-          // print(name_route);
-
-          //print(return_msg.containsKey(name_route));
           if (return_msg.containsKey(trip[4].toString() + trip[5].toString())) {
             //return_msg[{trip[4], trip[5]}].add({"trip": trip, "stops": stops});
           } else {
@@ -107,9 +81,7 @@ class Server {
               {"trip": trip, "stops": stops}
             ];
           }
-          print(return_msg.keys);
         }
-        print(return_msg);
         return return_msg;
       default:
         throw Exception("Fallo al recuperar las estaciones de Colectivo.");

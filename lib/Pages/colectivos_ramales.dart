@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
@@ -20,13 +21,19 @@ class ColectivosRamales extends StatefulWidget {
 class _ColectivosRamalesState extends State<ColectivosRamales> {
   List ramales = [];
   List _ramalesSeleccionados = [];
+  List<MultiSelectItem>? ramalesItems;
   bool loading = true;
+  final Key _multiSelectKey = const Key("multiSelectKey");
 
   Future<void>? fetchData() async {
     List ramalesRecvd = await Server.getColectivosRamales();
     setState(() {
       ramales = ramalesRecvd;
       loading = false;
+      ramalesItems = ramales
+          .map((ramal) => MultiSelectItem(
+          ramal, ramal["name"].toString()))
+          .toList();
     });
   }
 
@@ -73,26 +80,57 @@ class _ColectivosRamalesState extends State<ColectivosRamales> {
                               ),
                             ]),
                         MultiSelectDialogField(
-                            items: ramales
-                                .map((ramal) => MultiSelectItem(
-                                    ramal, ramal["name"].toString()))
-                                .toList(),
-                            listType: MultiSelectListType.CHIP,
-                            searchable: true,
-                            onConfirm: (values) {
+                          items: ramalesItems!,
+                          initialValue: _ramalesSeleccionados,
+                          listType: MultiSelectListType.LIST,
+                          searchable: true,
+                          onConfirm: (values) {
+                            _ramalesSeleccionados = values;
+                          },
+                          onSelectionChanged: (values) {
+                            if (values.length > 3){
+                              AlertDialog alert = AlertDialog(
+                                title: const Text("Error"),
+                                content: const Text("You can not select more than 3 items."),
+                                actions: [
+                                  ElevatedButton(
+                                      child: const Text("OK"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      }
+                                  ),
+                                ],
+                              );
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return alert;
+                                },
+                              );
+                              ramalesItems!.elementAt(
+                                  ramalesItems!.indexOf(
+                                      ramalesItems!.where(
+                                              (ramal) =>
+                                          ramal.value["id"] == values[3]["id"]).elementAt(0)
+                                  )
+                              ).selected = false;
+                              values.removeAt(3);
+                            }else{
                               _ramalesSeleccionados = values;
+                            }
+                          },
+                          chipDisplay: MultiSelectChipDisplay(
+                            items: _ramalesSeleccionados
+                                .map((e) =>
+                                    MultiSelectItem(e, e["name"].toString()))
+                                .toList(),
+                            onTap: (value) {
+                              setState(() {
+                                _ramalesSeleccionados.remove(value);
+                              });
                             },
-                            chipDisplay: MultiSelectChipDisplay(
-                              items: _ramalesSeleccionados
-                                  .map((e) =>
-                                      MultiSelectItem(e, e["name"].toString()))
-                                  .toList(),
-                              onTap: (value) {
-                                setState(() {
-                                  _ramalesSeleccionados.remove(value);
-                                });
-                              },
-                            )),
+                          )
+                        ),
                         const SizedBox(height: 50),
                         ElevatedButton(
                             key: const Key("button_buscar_ramales"),
@@ -110,7 +148,7 @@ class _ColectivosRamalesState extends State<ColectivosRamales> {
                                           title: "Ramales de Colectivo",
                                           routes: ramalesSelected)));
                             }),
-                      ]),
+                        ]),
                     ),
                   ]),
                 ),
