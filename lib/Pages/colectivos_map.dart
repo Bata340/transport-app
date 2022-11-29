@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
@@ -17,8 +19,10 @@ class ColectivosMap extends StatefulWidget {
 
 class _ColectivosMapState extends State<ColectivosMap> {
   LatLng? currentLatLng;
+  Map? stationsData;
   var stations;
-  var routes;
+  var routesPolylines;
+  List<Marker> colectivosMarkers = [];
 
   Future<LatLng?> getCurrentLocation() async {
     if (await Permission.location.request().isGranted) {
@@ -30,10 +34,62 @@ class _ColectivosMapState extends State<ColectivosMap> {
     }
   }
 
+
+  /*void getMarkersColectivos() async {
+    List<Marker> markersColectivos = stations;
+    print("call");
+    if (stationsData != null){
+      stationsData!.forEach((key, arrayRamales) async {
+        arrayRamales!.forEach((trips_and_stops) async{
+          Map route = widget.routes!.where(
+                  (route) => route["id"] == trips_and_stops["trip"][1]
+          ).toList().elementAt(0);
+          String name = route["name"];
+          List? colectivosRecvd = await Server.getColectivosRamal(
+            name,
+            trips_and_stops["trip"][3]
+          );
+          colectivosRecvd!.forEach((datosColectivos){
+            markersColectivos.add(
+              Marker(
+                point: LatLng(
+                  datosColectivos["latitude"], //Lat
+                  datosColectivos["longitude"] //Lon
+                ),
+                builder: (context) =>
+                  FloatingActionButton(
+                    heroTag: ("marker_${datosColectivos["tip_id"]}"),
+                    key: Key("marker_${datosColectivos["tip_id"]}"),
+                    backgroundColor:
+                    Color(datosColectivos.keys.toList().indexOf(key)),
+                    child: Container(
+                      child: Image.asset(
+                        "assets/colectivo_detail/Colectivo.png",/* +
+                        stationsRecvd.keys
+                            .toList()
+                            .indexOf(key)
+                            .toString() +
+                        ".png",*/
+                        height: 65.0,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  onPressed: () => {},
+                )
+              )
+            );
+          });
+        });
+      });
+      setState (() {
+        colectivosMarkers = markersColectivos;
+      });
+    }
+  }*/
+
   Future<void>? fetchData() async {
     LatLng? latLong = await getCurrentLocation();
     Map? stationsRecvd = await Server.getColectivosStations(widget.routes);
-    //print(stationsRecvd);
     var markers = <Marker>[];
     var polylines = <Polyline>[];
     var colors = [
@@ -61,19 +117,24 @@ class _ColectivosMapState extends State<ColectivosMap> {
                     backgroundColor:
                         Color(stationsRecvd.keys.toList().indexOf(key)),
                     child: Container(
-                      child: Image.asset(
-                        "assets/colectivo_detail/stop_marker" +
-                            stationsRecvd.keys
-                                .toList()
-                                .indexOf(key)
-                                .toString() +
-                            ".png",
-                        height: 65.0,
-                        fit: BoxFit.cover,
-                      ),
+                      child: Tooltip(
+                        showDuration: Duration(days: 1),
+                        triggerMode: TooltipTriggerMode.tap,
+                        message: "Ramal: ${trip_and_stops["trip"][4]}\nSentido: ${trip_and_stops["trip"][3]}\nDirección: ${stop[2]}",
+                        child: Image.asset(
+                          "assets/colectivo_detail/stop_marker" +
+                              stationsRecvd.keys
+                                  .toList()
+                                  .indexOf(key)
+                                  .toString() +
+                              ".png",
+                          height: 65.0,
+                          fit: BoxFit.cover,
+                        ),
+                      )
                     ),
                     onPressed: () {
-                      print("TOUCH ${stop[0]}");
+
                     },
                   )));
           stops_pos.add(
@@ -83,52 +144,34 @@ class _ColectivosMapState extends State<ColectivosMap> {
                 ),
           );
         });
-        //print(stops_pos);
         polylines.add(Polyline(
             strokeWidth: 3, points: stops_pos, color: Color(colors[aux])));
-
-        // trip_and_stops["stops"].forEach((stop) {
-        //   markers.add(Marker(
-        //       point: LatLng(
-        //           stop[4], //Lat
-        //           stop[5] //Lon
-        //           ),
-        //       builder: (context) => FloatingActionButton(
-        //             heroTag: ("marker_${stop[0]}"),
-        //             key: Key("marker_${stop[0]}"),
-        //             backgroundColor: Colors.white12.withOpacity(0.1),
-        //             child: Container(
-        //               child: Image.asset(
-        //                 "EcoBiciMarker.png",
-        //                 height: 45.0,
-        //                 fit: BoxFit.cover,
-        //               ),
-        //             ),
-        //             onPressed: () {
-        //               print("TOUCH ${stop[0]}");
-        //             },
-        //           )));
-        // });
       });
       aux += 1;
-      print(aux);
     });
     setState(() {
       currentLatLng = latLong;
       stations = markers;
-      routes = polylines;
+      //colectivosMarkers = markers;
+      stationsData = stationsRecvd;
+      routesPolylines = polylines;
     });
-    return;
+    //getMarkersColectivos();
   }
 
   @override
   void initState() {
     fetchData();
+    /*Stream.periodic(
+        const Duration(seconds: 10),
+            (count) async {getMarkersColectivos();}
+    );*/
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -155,11 +198,13 @@ class _ColectivosMapState extends State<ColectivosMap> {
                     ),
                     PolylineLayer(
                       polylineCulling: true,
-                      polylines: routes,
+                      polylines: routesPolylines,
                     ),
-                    MarkerLayer(markers: stations),
+                    //MarkerLayer(markers: stations),
+                    MarkerLayer(markers: stations)
                   ],
-                ),
-        ));
+                )
+        )
+    );
   }
 }

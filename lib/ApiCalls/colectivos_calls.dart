@@ -24,7 +24,7 @@ class Server {
             .convert(utf8.decode(fileRoutes.content))
           ..removeAt(0);
         ramales = csv
-            .map((element) => {"id": element[0], "name": element[2]})
+            .map((element) => {"id": element[0], "name": element[2], "agency_id": element[1]})
             .toList();
         return ramales;
       default:
@@ -88,8 +88,9 @@ class Server {
     }
   }
 
-  static Future<dynamic?> getColectivosRamal(
-      route_id, trip_id, agency_id) async {
+  static Future<List?> getColectivosRamal(
+      /*route_id, trip_id, agency_id*/
+      route_short_name, trip_name) async {
     await dotenv.load();
     var clientId = dotenv.env["api_client_id"];
     var clientSecret = dotenv.env["api_client_secret"];
@@ -98,9 +99,6 @@ class Server {
     final Map<String, String> qParams = {
       'client_id': clientId!,
       'client_secret': clientSecret!,
-      "route_id": route_id,
-      "trip_id": trip_id,
-      "agency_id": agency_id
     };
 
     final response = await http.get(
@@ -108,10 +106,14 @@ class Server {
     );
     switch (response.statusCode) {
       case HttpStatus.ok:
-
+        var jsonData = json.decode(response.body);
+        var returnData =  (jsonData.where(
+                (ColectivoData) => ColectivoData["route_short_name"] == route_short_name && ColectivoData["trip_headsign"] == trip_name
+        ).toList());
+        return returnData;
       default:
         throw Exception(
-            "Fallo al recuperar los colectivos del ramal $route_id.");
+            "Fallo al recuperar los colectivos del ramal.");// $route_id.");
     }
   }
 }
