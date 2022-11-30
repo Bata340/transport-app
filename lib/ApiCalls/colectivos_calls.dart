@@ -6,6 +6,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:archive/archive_io.dart';
 import 'package:csv/csv.dart';
 import '../globals.dart' as globals;
+import 'package:collection/collection.dart';
+
 
 
 class Server {
@@ -89,31 +91,35 @@ class Server {
   }
 
   static Future<List?> getColectivosRamal(
-      /*route_id, trip_id, agency_id*/
-      route_short_name, trip_name) async {
+      agency_id, route_short_name, List<String> stops, trip_id) async {
     await dotenv.load();
     var clientId = dotenv.env["api_client_id"];
     var clientSecret = dotenv.env["api_client_secret"];
     var urlApi = dotenv.env["api_url"];
 
     final Map<String, String> qParams = {
+      'json': "1",
       'client_id': clientId!,
       'client_secret': clientSecret!,
+      'agency_id': agency_id.toString()
     };
 
     final response = await http.get(
-      Uri.https(urlApi!, "/colectivos/vehiclePositionsSimple", qParams),
+      Uri.https(urlApi!, "/colectivos/vehiclePositions", qParams),
     );
     switch (response.statusCode) {
       case HttpStatus.ok:
-        var jsonData = json.decode(response.body);
-        var returnData =  (jsonData.where(
-                (ColectivoData) => ColectivoData["route_short_name"] == route_short_name && ColectivoData["trip_headsign"] == trip_name
-        ).toList());
+        var jsonData = json.decode(response.body)["_entity"];
+        var returnData =  jsonData.where(
+          (ColectivoData) {
+            return (stops.contains(ColectivoData["_vehicle"]["_stop_id"].toString()));
+          }
+        );
+        returnData = returnData.map<Map<String, dynamic>>((st) => {"latitude": st["_vehicle"]["_position"]["_latitude"], "longitude":st["_vehicle"]["_position"]["_longitude"]}).toList();
         return returnData;
       default:
         throw Exception(
-            "Fallo al recuperar los colectivos del ramal.");// $route_id.");
+            "Fallo al recuperar los colectivos del ramal.");
     }
   }
 }

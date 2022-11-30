@@ -99,13 +99,18 @@ flutter:
     - background_ecobici.png
     - background_homepage.png
     - background_subtes.png
-
     - stop_marker0.png
     - stop_marker1.png
     - stop_marker2.png
     - stop_marker3.png
     - stop_marker4.png
     - stop_marker5.png
+    - colectivo_marker0.png
+    - colectivo_marker1.png
+    - colectivo_marker2.png
+    - colectivo_marker3.png
+    - colectivo_marker4.png
+    - colectivo_marker5.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

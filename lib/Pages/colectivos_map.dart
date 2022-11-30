@@ -1,11 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../ApiCalls/colectivos_calls.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+
 
 class ColectivosMap extends StatefulWidget {
   ColectivosMap({super.key, required this.title, required this.routes});
@@ -23,6 +23,7 @@ class _ColectivosMapState extends State<ColectivosMap> {
   var stations;
   var routesPolylines;
   List<Marker> colectivosMarkers = [];
+  int renderCount = 0;
 
   Future<LatLng?> getCurrentLocation() async {
     if (await Permission.location.request().isGranted) {
@@ -35,9 +36,8 @@ class _ColectivosMapState extends State<ColectivosMap> {
   }
 
 
-  /*void getMarkersColectivos() async {
-    List<Marker> markersColectivos = stations;
-    print("call");
+  void getMarkersColectivos() async {
+    List<Marker> markersColectivos = new List<Marker>.from(stations);
     if (stationsData != null){
       stationsData!.forEach((key, arrayRamales) async {
         arrayRamales!.forEach((trips_and_stops) async{
@@ -45,9 +45,12 @@ class _ColectivosMapState extends State<ColectivosMap> {
                   (route) => route["id"] == trips_and_stops["trip"][1]
           ).toList().elementAt(0);
           String name = route["name"];
+          List<String> stopsList = trips_and_stops["stops"].map<String>((st) => st[0].toString()).toList();
           List? colectivosRecvd = await Server.getColectivosRamal(
+            route['agency_id'],
             name,
-            trips_and_stops["trip"][3]
+            stopsList,
+            trips_and_stops["trip"][0]
           );
           colectivosRecvd!.forEach((datosColectivos){
             markersColectivos.add(
@@ -64,12 +67,12 @@ class _ColectivosMapState extends State<ColectivosMap> {
                     Color(datosColectivos.keys.toList().indexOf(key)),
                     child: Container(
                       child: Image.asset(
-                        "assets/colectivo_detail/Colectivo.png",/* +
-                        stationsRecvd.keys
+                        "assets/colectivo_detail/colectivo_markers/colectivo_marker" +
+                        stationsData!.keys
                             .toList()
                             .indexOf(key)
                             .toString() +
-                        ".png",*/
+                        ".png",
                         height: 65.0,
                         fit: BoxFit.cover,
                       ),
@@ -83,14 +86,15 @@ class _ColectivosMapState extends State<ColectivosMap> {
       });
       setState (() {
         colectivosMarkers = markersColectivos;
+        renderCount = renderCount + 1;
       });
     }
-  }*/
+  }
 
   Future<void>? fetchData() async {
     LatLng? latLong = await getCurrentLocation();
     Map? stationsRecvd = await Server.getColectivosStations(widget.routes);
-    var markers = <Marker>[];
+    List<Marker> markers = <Marker>[];
     var polylines = <Polyline>[];
     var colors = [
       0xFFE34135,
@@ -103,7 +107,6 @@ class _ColectivosMapState extends State<ColectivosMap> {
     var aux = 0;
     stationsRecvd?.forEach((key, trips) {
       trips.forEach((trip_and_stops) {
-        //print(trip_and_stops);
         var stops_pos = <LatLng>[];
         trip_and_stops["stops"].forEach((stop) {
           markers.add(Marker(
@@ -151,27 +154,26 @@ class _ColectivosMapState extends State<ColectivosMap> {
     });
     setState(() {
       currentLatLng = latLong;
-      stations = markers;
-      //colectivosMarkers = markers;
+      stations = new List<Marker>.from(markers);
+      colectivosMarkers = new List<Marker>.from(markers);
       stationsData = stationsRecvd;
       routesPolylines = polylines;
     });
-    //getMarkersColectivos();
+    getMarkersColectivos();
   }
 
   @override
   void initState() {
     fetchData();
-    /*Stream.periodic(
-        const Duration(seconds: 10),
-            (count) async {getMarkersColectivos();}
-    );*/
+    Timer.periodic(
+        const Duration(seconds: 30),
+            (Timer t) async {getMarkersColectivos();}
+    );
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -192,16 +194,20 @@ class _ColectivosMapState extends State<ColectivosMap> {
                     zoom: 16,
                   ),
                   children: [
+
                     TileLayer(
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     ),
+
                     PolylineLayer(
                       polylineCulling: true,
                       polylines: routesPolylines,
                     ),
-                    //MarkerLayer(markers: stations),
-                    MarkerLayer(markers: stations)
+                    MarkerLayer(
+                        key:Key("markers_"+renderCount.toString()),
+                        markers: colectivosMarkers
+                    ),
                   ],
                 )
         )
