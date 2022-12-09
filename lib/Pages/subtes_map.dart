@@ -37,13 +37,14 @@ class _SubteMapState extends State<SubteMap> {
     }
   }
 
-  void seeDetailsStation (id, name, route) {
+  void seeDetailsStation (id, name, route, programmed_arrivals) {
     Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => SubteDetail(
             stationId: id,
             stationName: name,
             route: route,
+            programmed_arrivals:programmed_arrivals
         ))
     );
   }
@@ -53,7 +54,6 @@ class _SubteMapState extends State<SubteMap> {
     List? stationsRecvd = await Server.getSubtesStations();
     var markers = <Marker>[];
     stationsRecvd?.forEach((station) {
-      print(station);
       markers.add(
           Marker(
               point: LatLng(
@@ -66,7 +66,7 @@ class _SubteMapState extends State<SubteMap> {
                 backgroundColor: Colors.white12.withOpacity(0.1),
                 child: Container(
                   child: Image.asset(
-                    station["route"]+"Marker.png",
+                    station["route"][0]+"Marker.png",
                     height: 20.0,
 
                     fit: BoxFit.cover,
@@ -77,6 +77,7 @@ class _SubteMapState extends State<SubteMap> {
                       station["station_id"],
                       station["name"],
                       station["route"],
+                      station["programmed_arrivals"]
                   );
                 },
               )
@@ -102,20 +103,28 @@ class _SubteMapState extends State<SubteMap> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body:
-      currentLatLng == null ? const Center(child: CircularProgressIndicator()) :
-      FlutterMap(
-        options: MapOptions(
-          center: currentLatLng,
-          zoom: 16,
-        ),
-        children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/background_subtes.png"),
+            fit: BoxFit.fitHeight,
           ),
-          MarkerLayer(markers: stations)
-        ],
-      ),
+        ),
+        child: currentLatLng == null
+          ? const Center(child: CircularProgressIndicator())
+          : FlutterMap(
+            options: MapOptions(
+              center: currentLatLng,
+              zoom: 16,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              ),
+              MarkerLayer(markers: stations)
+            ],
+          ),
+      )
     );
   }
 }
